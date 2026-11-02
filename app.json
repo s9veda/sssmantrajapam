@@ -1,0 +1,53 @@
+{
+  "expo": {
+    "name": "SSS Mantra Japam",
+    "slug": "sssmantrajapam",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "scheme": "sssmantrajapam",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.s9veda.sssmantrajapam",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "com.s9veda.sssmantrajapam",
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "output": "server",
+      "bundler": "metro",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-asset",
+      "expo-localization",
+      "expo-font"
+    ],
+    "extra": {
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "c9ee4c67-552f-48e9-bb4a-40ae16ed3bff"
+      }
+    },
+    "owner": "s9veda",
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

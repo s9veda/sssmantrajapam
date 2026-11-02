@@ -1,0 +1,46 @@
+{
+  "name": "sssmantrajapam",
+  "version": "1.0.0",
+  "main": "expo-router/entry",
+  "dependencies": {
+    "@expo-google-fonts/inter": "^0.4.2",
+    "@expo/vector-icons": "^15.0.2",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "expo": "~58.0.21",
+    "expo-asset": "~58.0.18",
+    "expo-constants": "~58.0.13",
+    "expo-dev-client": "~58.0.18",
+    "expo-font": "~58.0.11",
+    "expo-linear-gradient": "~58.0.3",
+    "expo-linking": "~58.0.15",
+    "expo-localization": "~58.0.5",
+    "expo-router": "~58.0.28",
+    "expo-server": "~58.0.6",
+    "expo-status-bar": "~58.0.4",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "react-native": "0.88.1",
+    "react-native-safe-area-context": "~5.10.1",
+    "react-native-screens": "~4.30.0",
+    "react-native-web": "^0.21.4"
+  },
+  "devDependencies": {
+    "@types/react": "~19.3.0",
+    "eslint": "^9.0.0",
+    "eslint-config-expo": "~58.0.4",
+    "typescript": "~6.0.3",
+    "wrangler": "^4.156.0"
+  },
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web",
+    "lint": "expo lint",
+    "typecheck": "tsc --noEmit",
+    "export:web": "expo export -p web",
+    "preview:web": "npm run export:web && wrangler dev",
+    "deploy:web": "npm run export:web && wrangler deploy"
+  },
+  "private": true
+}

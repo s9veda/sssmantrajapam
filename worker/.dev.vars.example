@@ -1,0 +1,11 @@
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_KEY=your-service-role-key
+BREVO_API_KEY=
+BREVO_SENDER_EMAIL=noreply@example.com
+BREVO_SENDER_NAME=Sainam Japam
+SESSION_SECRET=change-me-to-a-long-random-string
+# Optional: /review_login is enabled only when both are set
+REVIEW_LOGIN_EMAIL=
+REVIEW_LOGIN_PASSWORD=
+# Optional comma-separated list of allowed origins; default is *
+ALLOWED_ORIGINS=

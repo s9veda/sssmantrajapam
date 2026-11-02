@@ -1,0 +1,18 @@
+{
+  "name": "sssmantrajapam-web",
+  "main": "./cloudflare/server.mjs",
+  "compatibility_date": "2025-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "./dist/client",
+    "binding": "ASSETS"
+  },
+  "find_additional_modules": true,
+  "base_dir": "./dist",
+  "rules": [
+    { "type": "CommonJS", "globs": ["server/**/*.js"], "fallthrough": true },
+    { "type": "Text", "globs": ["server/**/*.json"], "fallthrough": true },
+    { "type": "Data", "globs": ["server/**/*.map"], "fallthrough": true }
+  ],
+  "observability": { "enabled": true }
+}
