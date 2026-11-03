@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, TextInput, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { colors } from '@/lib/theme';
 
 interface FormInputProps {
   label: string;
@@ -70,33 +71,33 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     marginBottom: 8,
-    color: '#0B1220',
+    color: colors.ink,
     fontFamily: 'Inter_400Regular',
   },
   required: {
-    color: '#EF4444',
+    color: colors.error,
   },
   input: {
     width: '100%',
     padding: 12,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#E6EEF8',
-    backgroundColor: '#FBFEFF',
+    borderColor: colors.line,
+    backgroundColor: colors.surface,
     fontSize: 14,
-    color: '#0B1220',
+    color: colors.ink,
     fontFamily: 'Inter_400Regular',
-    shadowColor: '#0B1220',
+    shadowColor: colors.ink,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.02,
     shadowRadius: 0,
     elevation: 0,
   },
   inputError: {
-    borderColor: '#EF4444',
+    borderColor: colors.error,
   },
   errorText: {
-    color: '#EF4444',
+    color: colors.error,
     fontSize: 12,
     marginTop: 4,
     fontFamily: 'Inter_400Regular',

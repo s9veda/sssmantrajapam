@@ -1,6 +1,7 @@
 import React, { ReactNode, isValidElement, cloneElement } from 'react';
 import { Pressable, Text, View, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { colors } from '@/lib/theme';
 
 interface ButtonProps extends React.ComponentPropsWithoutRef<typeof Pressable> {
   variant?: 'primary' | 'secondary' | 'outline';
@@ -18,21 +19,21 @@ const sizeStyles = {
 } as const;
 
 const gradientColors = {
-  primary: ['#FF6200', '#FF9F6F'] as const,
-  secondary: ['#1075B9', '#10B981'] as const,
+  primary: [colors.saffron, colors.saffronSoft] as const,
+  secondary: [colors.forest, colors.forest] as const,
   outline: ['transparent', 'transparent'] as const,
 };
 
 const textColors = {
-  primary: '#FFFFFF',
-  secondary: '#FFFFFF',
-  outline: '#FF6200',
+  primary: colors.white,
+  secondary: colors.white,
+  outline: colors.saffron,
 };
 
 const borderStyles = {
   primary: { borderWidth: 0 },
   secondary: { borderWidth: 0 },
-  outline: { borderWidth: 2, borderColor: '#FF6200' },
+  outline: { borderWidth: 2, borderColor: colors.saffron },
 };
 
 export function Button({
@@ -136,7 +137,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
-    shadowColor: '#0F62FE',
+    shadowColor: colors.forest,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.14,
     shadowRadius: 18,

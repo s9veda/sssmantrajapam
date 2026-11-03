@@ -1,7 +1,7 @@
 import type { AggregateData, ApiResponse, AuthResult, SubmitPayload, User } from '@/types';
 
 export const API_BASE_URL = (
-  process.env.EXPO_PUBLIC_API_BASE_URL || 'https://api.saimantrajapam.org'
+  process.env.EXPO_PUBLIC_API_BASE_URL || 'https://app.s9veda.org/api'
 ).replace(/\/+$/, '');
 
 async function request<T>(path: string, options: RequestInit & { token?: string | null } = {}): Promise<ApiResponse<T>> {

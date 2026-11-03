@@ -2,6 +2,7 @@ import React from 'react';
 import { Text, StyleSheet, Pressable, Modal as RNModal, KeyboardAvoidingView, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Button } from './Button';
+import { colors } from '@/lib/theme';
 
 interface ModalProps {
   visible: boolean;
@@ -30,9 +31,9 @@ export function Modal({
   if (!visible) return null;
 
   const messageColors = {
-    success: '#10B981',
-    error: '#EF4444',
-    info: '#6B7280',
+    success: colors.forest,
+    error: colors.error,
+    info: colors.muted,
   };
 
   return (
@@ -49,7 +50,7 @@ export function Modal({
           keyboardVerticalOffset={0}
         >
           <LinearGradient
-            colors={['rgba(255, 255, 255, 0.98)', 'rgba(246, 250, 255, 0.98)']}
+            colors={[colors.surface, colors.paper]}
             style={styles.modalContent}
           >
             <Pressable style={styles.closeButton} onPress={onClose} accessibilityLabel="Close">
@@ -100,8 +101,8 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 20,
     borderWidth: 1,
-    borderColor: 'rgba(11, 18, 32, 0.03)',
-    shadowColor: '#0B1220',
+    borderColor: colors.line,
+    shadowColor: colors.ink,
     shadowOffset: { width: 0, height: 20 },
     shadowOpacity: 0.16,
     shadowRadius: 50,
@@ -119,12 +120,12 @@ const styles = StyleSheet.create({
   closeButtonText: {
     fontSize: 22,
     lineHeight: 22,
-    color: '#6B7280',
+    color: colors.muted,
   },
   title: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#073763',
+    color: colors.forest,
     marginBottom: 6,
     fontFamily: 'Inter_700Bold',
   },

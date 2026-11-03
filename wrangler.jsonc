@@ -14,5 +14,6 @@
     { "type": "Text", "globs": ["server/**/*.json"], "fallthrough": true },
     { "type": "Data", "globs": ["server/**/*.map"], "fallthrough": true }
   ],
+  "routes": [{ "pattern": "app.s9veda.org/*", "zone_name": "s9veda.org" }],
   "observability": { "enabled": true }
 }

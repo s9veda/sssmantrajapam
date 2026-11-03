@@ -19,7 +19,7 @@ const routes: Record<string, Partial<Record<string, Handler>>> = {
 };
 
 async function route(request: Request, env: Env): Promise<Response> {
-  const path = new URL(request.url).pathname.replace(/\/+$/, '') || '/';
+  const path = new URL(request.url).pathname.replace(/^\/api(?=\/|$)/, '').replace(/\/+$/, '') || '/';
   const entry = routes[path];
   if (!entry) return json(404, { error: 'Not found' });
   const handler = entry[request.method];

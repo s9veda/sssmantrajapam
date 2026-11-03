@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
   Animated,
   Easing,
   KeyboardAvoidingView,
@@ -13,57 +14,46 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { Button } from './Button';
-import { FormInput } from './FormInput';
 import { useAuth } from '@/context/AuthContext';
 import { useTranslation, type Locale } from '@/i18n';
+import { colors } from '@/lib/theme';
 
 interface ProfileDrawerProps {
   onClose: () => void;
 }
 
-type Mode = 'signin' | 'signup' | 'review';
+type Panel = 'signin' | 'signup' | 'review';
+type IconName = React.ComponentProps<typeof Ionicons>['name'];
 
-// Rendered only while open; it animates in on mount and calls onClose once the close animation ends.
+// Rendered only while open; it slides in on mount and calls onClose once the close animation ends.
 export function ProfileDrawer({ onClose }: ProfileDrawerProps) {
   const { width } = useWindowDimensions();
-  const insets = useSafeAreaInsets();
-  const drawerWidth = Math.min(380, width * 0.9);
-  const [slide] = useState(() => new Animated.Value(0));
+  const drawerWidth = Math.min(390, width * 0.9);
+  const [translateX] = useState(() => new Animated.Value(drawerWidth));
   const useNative = Platform.OS !== 'web';
 
   useEffect(() => {
-    Animated.timing(slide, { toValue: 1, duration: 240, easing: Easing.out(Easing.cubic), useNativeDriver: useNative }).start();
-  }, [slide, useNative]);
+    Animated.timing(translateX, { toValue: 0, duration: 240, easing: Easing.out(Easing.cubic), useNativeDriver: useNative }).start();
+  }, [translateX, useNative]);
 
   const close = () => {
-    Animated.timing(slide, { toValue: 0, duration: 200, easing: Easing.in(Easing.cubic), useNativeDriver: useNative }).start(onClose);
+    Animated.timing(translateX, { toValue: drawerWidth, duration: 190, useNativeDriver: useNative }).start(() => onClose());
   };
 
   return (
-    <Modal transparent visible animationType="none" onRequestClose={close} statusBarTranslucent>
-      <View style={styles.root}>
-        <Animated.View style={[styles.backdrop, { opacity: slide }]}>
-          <Pressable style={StyleSheet.absoluteFill} onPress={close} accessibilityRole="button" accessibilityLabel="Close" />
-        </Animated.View>
-        <Animated.View
-          style={[
-            styles.drawer,
-            {
-              width: drawerWidth,
-              paddingTop: insets.top + 12,
-              paddingBottom: insets.bottom + 12,
-              transform: [{ translateX: slide.interpolate({ inputRange: [0, 1], outputRange: [drawerWidth, 0] }) }],
-            },
-          ]}
-        >
-          <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-            <DrawerContent onClose={close} />
-          </KeyboardAvoidingView>
-        </Animated.View>
-      </View>
+    <Modal transparent visible animationType="none" onRequestClose={close} presentationStyle="overFullScreen" statusBarTranslucent>
+      <SafeAreaProvider style={styles.flex}>
+        <View style={styles.modalRoot}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Close" onPress={close} style={StyleSheet.absoluteFill} />
+          <Animated.View style={[styles.drawer, { width: drawerWidth, transform: [{ translateX }] }]}>
+            <SafeAreaView edges={['top', 'bottom']} style={styles.flex}>
+              <DrawerContent onClose={close} />
+            </SafeAreaView>
+          </Animated.View>
+        </View>
+      </SafeAreaProvider>
     </Modal>
   );
 }
@@ -71,54 +61,124 @@ export function ProfileDrawer({ onClose }: ProfileDrawerProps) {
 function DrawerContent({ onClose }: { onClose: () => void }) {
   const { t, locale, setLocale, locales, localeNames } = useTranslation();
   const { user, logout, reviewLoginEnabled } = useAuth();
+  const [signingOut, setSigningOut] = useState(false);
+
+  async function handleSignOut() {
+    setSigningOut(true);
+    await logout();
+    setSigningOut(false);
+    onClose();
+  }
 
   return (
     <>
-      <View style={styles.header}>
-        <Text style={styles.title}>{t('profile.title')}</Text>
-        <Pressable onPress={onClose} hitSlop={12} accessibilityRole="button" accessibilityLabel={t('profile.close')}>
-          <Ionicons name="close" size={26} color="#374151" />
+      <View style={styles.drawerHeader}>
+        <Text style={styles.drawerTitle}>{t('profile.yourProfile')}</Text>
+        <Pressable accessibilityRole="button" accessibilityLabel={t('profile.close')} onPress={onClose} style={styles.closeButton}>
+          <Ionicons name="close" size={20} color={colors.white} />
         </Pressable>
       </View>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex}>
+        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+          {user ? (
+            <>
+              <View style={styles.identityCard}>
+                <View style={styles.avatar}>
+                  <Text style={styles.avatarText}>{(user.name || user.email || '?').trim().charAt(0).toLocaleUpperCase()}</Text>
+                </View>
+                <Text numberOfLines={1} style={styles.userName}>{user.name}</Text>
+                {user.email ? <Text numberOfLines={2} style={styles.userEmail}>{user.email}</Text> : null}
+                <View style={styles.statusBadge}>
+                  <Ionicons name="checkmark-circle" size={15} color={colors.forest} />
+                  <Text style={styles.statusText}>{t('profile.signedInBadge')}</Text>
+                </View>
+              </View>
+              <Pressable accessibilityRole="button" disabled={signingOut} onPress={() => void handleSignOut()} style={styles.signOutButton}>
+                {signingOut ? <ActivityIndicator color={colors.error} /> : <Ionicons name="log-out-outline" size={18} color={colors.error} />}
+                <Text style={styles.signOutLabel}>{t('profile.signOut')}</Text>
+              </Pressable>
+            </>
+          ) : (
+            <>
+              <View style={styles.identityCard}>
+                <View style={styles.signedOutIcon}>
+                  <Ionicons name="person-circle-outline" size={28} color={colors.forest} />
+                </View>
+                <Text style={styles.signedOutTitle}>{t('profile.signedOutTitle')}</Text>
+                <Text style={styles.signedOutBody}>{t('profile.signedOutBody')}</Text>
+              </View>
+              <SignInOptions reviewLoginEnabled={reviewLoginEnabled} onDone={onClose} />
+            </>
+          )}
 
-      <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
-        {user ? (
-          <View style={styles.userBlock}>
-            <Ionicons name="person-circle" size={56} color="#FF6200" />
-            <Text style={styles.signedInAs}>{t('profile.signedInAs')}</Text>
-            <Text style={styles.userName}>{user.name}</Text>
-            {user.email ? <Text style={styles.userEmail}>{user.email}</Text> : null}
-            <Button variant="outline" size="md" onPress={() => void logout()} style={styles.fullWidth}>
-              {t('profile.signOut')}
-            </Button>
+          <View style={styles.section}>
+            <View style={styles.sectionTitleRow}>
+              <Ionicons name="language-outline" size={17} color={colors.forest} />
+              <Text style={styles.sectionTitle}>{t('profile.language')}</Text>
+            </View>
+            <View style={styles.chips}>
+              {locales.map((code: Locale) => (
+                <Pressable
+                  key={code}
+                  onPress={() => setLocale(code)}
+                  style={[styles.chip, code === locale && styles.chipActive]}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: code === locale }}
+                >
+                  <Text style={[styles.chipText, code === locale && styles.chipTextActive]}>{localeNames[code]}</Text>
+                </Pressable>
+              ))}
+            </View>
           </View>
-        ) : (
-          <SignInPanel reviewLoginEnabled={reviewLoginEnabled} onDone={onClose} />
-        )}
-
-        <Text style={styles.sectionLabel}>{t('profile.language')}</Text>
-        <View style={styles.chips}>
-          {locales.map((code: Locale) => (
-            <Pressable
-              key={code}
-              onPress={() => setLocale(code)}
-              style={[styles.chip, code === locale && styles.chipActive]}
-              accessibilityRole="button"
-              accessibilityState={{ selected: code === locale }}
-            >
-              <Text style={[styles.chipText, code === locale && styles.chipTextActive]}>{localeNames[code]}</Text>
-            </Pressable>
-          ))}
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </>
   );
 }
 
-function SignInPanel({ reviewLoginEnabled, onDone }: { reviewLoginEnabled: boolean; onDone: () => void }) {
+function SignInOptions({ reviewLoginEnabled, onDone }: { reviewLoginEnabled: boolean; onDone: () => void }) {
+  const { t } = useTranslation();
+  const [active, setActive] = useState<Panel | null>(null);
+
+  const options: { key: Panel; icon: IconName; title: string; hint: string }[] = [
+    { key: 'signin', icon: 'log-in-outline', title: t('profile.signIn'), hint: t('profile.signInHint') },
+    { key: 'signup', icon: 'person-add-outline', title: t('profile.signUp'), hint: t('profile.signUpHint') },
+    ...(reviewLoginEnabled
+      ? [{ key: 'review' as const, icon: 'shield-checkmark-outline' as IconName, title: t('profile.reviewAccess'), hint: t('profile.reviewHint') }]
+      : []),
+  ];
+
+  return (
+    <View>
+      {options.map((option) =>
+        active === option.key ? (
+          <View key={option.key} style={styles.formCard}>
+            <View style={styles.formHeader}>
+              <Text style={styles.formTitle}>{option.title}</Text>
+              <Pressable accessibilityRole="button" accessibilityLabel={t('profile.close')} hitSlop={10} onPress={() => setActive(null)}>
+                <Ionicons name="close" size={20} color={colors.muted} />
+              </Pressable>
+            </View>
+            <SignInForm panel={option.key} onDone={onDone} />
+          </View>
+        ) : (
+          <Pressable key={option.key} accessibilityRole="button" onPress={() => setActive(option.key)} style={styles.optionButton}>
+            <Ionicons name={option.icon} size={18} color={colors.forest} />
+            <View style={styles.optionCopy}>
+              <Text style={styles.optionLabel}>{option.title}</Text>
+              <Text style={styles.optionHint}>{option.hint}</Text>
+            </View>
+            <Ionicons name="arrow-forward" size={16} color={colors.muted} />
+          </Pressable>
+        ),
+      )}
+    </View>
+  );
+}
+
+function SignInForm({ panel, onDone }: { panel: Panel; onDone: () => void }) {
   const { t } = useTranslation();
   const { sendOTP, verifyOTP, reviewLogin } = useAuth();
-  const [mode, setMode] = useState<Mode>('signin');
   const [step, setStep] = useState<'contact' | 'otp'>('contact');
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
@@ -127,14 +187,7 @@ function SignInPanel({ reviewLoginEnabled, onDone }: { reviewLoginEnabled: boole
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
   const [busy, setBusy] = useState(false);
-
-  function switchMode(next: Mode) {
-    setMode(next);
-    setStep('contact');
-    setCode('');
-    setError('');
-    setInfo('');
-  }
+  const mode = panel === 'signup' ? 'signup' : 'signin';
 
   async function run(action: () => Promise<{ success: true } | { success: false; error: string }>, onSuccess?: () => void) {
     setBusy(true);
@@ -150,7 +203,7 @@ function SignInPanel({ reviewLoginEnabled, onDone }: { reviewLoginEnabled: boole
     if (!email.includes('@')) return setError(t('profile.emailRequired'));
     if (mode === 'signup' && !name.trim()) return setError(t('profile.nameRequired'));
     void run(
-      () => sendOTP(email, mode === 'signup' ? 'signup' : 'signin', mode === 'signup' ? name.trim() : undefined),
+      () => sendOTP(email, mode, mode === 'signup' ? name.trim() : undefined),
       () => {
         setStep('otp');
         setInfo(t('profile.codeSent'));
@@ -160,7 +213,7 @@ function SignInPanel({ reviewLoginEnabled, onDone }: { reviewLoginEnabled: boole
 
   function confirmCode() {
     if (!/^\d{6}$/.test(code)) return setError(t('profile.codeRequired'));
-    void run(() => verifyOTP(email, code, mode === 'signup' ? 'signup' : 'signin', mode === 'signup' ? name.trim() : undefined), onDone);
+    void run(() => verifyOTP(email, code, mode, mode === 'signup' ? name.trim() : undefined), onDone);
   }
 
   function submitReview() {
@@ -168,111 +221,202 @@ function SignInPanel({ reviewLoginEnabled, onDone }: { reviewLoginEnabled: boole
     void run(() => reviewLogin(email, password), onDone);
   }
 
+  const primary = (label: string, onPress: () => void) => (
+    <Pressable accessibilityRole="button" disabled={busy} onPress={onPress} style={[styles.primaryButton, busy && styles.disabled]}>
+      {busy ? <ActivityIndicator color={colors.white} /> : <Text style={styles.primaryLabel}>{label}</Text>}
+    </Pressable>
+  );
+
   return (
     <View>
-      <View style={styles.tabs}>
-        {(['signin', 'signup'] as const).map((m) => (
-          <Pressable key={m} onPress={() => switchMode(m)} style={[styles.tab, mode === m && styles.tabActive]} accessibilityRole="tab">
-            <Text style={[styles.tabText, mode === m && styles.tabTextActive]}>
-              {m === 'signin' ? t('profile.signIn') : t('profile.signUp')}
-            </Text>
-          </Pressable>
-        ))}
-      </View>
-
-      {mode === 'review' ? (
+      {panel === 'review' ? (
         <>
-          <Text style={styles.hint}>{t('profile.reviewHint')}</Text>
-          <FormInput label={t('profile.reviewEmail')} value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" autoComplete="email" />
-          <FormInput label={t('profile.reviewPassword')} value={password} onChangeText={setPassword} secureTextEntry autoCapitalize="none" autoComplete="password" onSubmitEditing={submitReview} />
-          <Button size="md" loading={busy} onPress={submitReview} style={styles.fullWidth}>{t('profile.signIn')}</Button>
+          <Text style={styles.copy}>{t('profile.reviewHint')}</Text>
+          <TextInput
+            accessibilityLabel={t('profile.reviewEmail')}
+            autoCapitalize="none"
+            autoComplete="email"
+            keyboardType="email-address"
+            onChangeText={setEmail}
+            placeholder={t('profile.reviewEmail')}
+            placeholderTextColor={colors.muted}
+            style={styles.input}
+            value={email}
+          />
+          <TextInput
+            accessibilityLabel={t('profile.reviewPassword')}
+            autoCapitalize="none"
+            autoComplete="password"
+            onChangeText={setPassword}
+            onSubmitEditing={submitReview}
+            placeholder={t('profile.reviewPassword')}
+            placeholderTextColor={colors.muted}
+            secureTextEntry
+            style={styles.input}
+            value={password}
+          />
+          {primary(t('profile.signIn'), submitReview)}
         </>
       ) : step === 'contact' ? (
         <>
           {mode === 'signup' && (
-            <FormInput label={t('auth.signup.nameLabel')} value={name} onChangeText={setName} placeholder={t('auth.signup.namePlaceholder')} autoComplete="name" />
+            <TextInput
+              accessibilityLabel={t('auth.signup.nameLabel')}
+              autoComplete="name"
+              onChangeText={setName}
+              placeholder={t('auth.signup.nameLabel')}
+              placeholderTextColor={colors.muted}
+              style={styles.input}
+              value={name}
+            />
           )}
-          <FormInput label={t('auth.signin.contactLabel')} value={email} onChangeText={setEmail} placeholder="you@example.com" keyboardType="email-address" autoCapitalize="none" autoComplete="email" onSubmitEditing={requestCode} />
-          <Button size="md" loading={busy} onPress={requestCode} style={styles.fullWidth}>
-            {mode === 'signup' ? t('auth.signup.contactTitle') : t('auth.signin.contactTitle')}
-          </Button>
+          <TextInput
+            accessibilityLabel={t('auth.signin.contactLabel')}
+            autoCapitalize="none"
+            autoComplete="email"
+            keyboardType="email-address"
+            onChangeText={setEmail}
+            onSubmitEditing={requestCode}
+            placeholder={t('auth.signin.contactLabel')}
+            placeholderTextColor={colors.muted}
+            style={styles.input}
+            value={email}
+          />
+          {primary(mode === 'signup' ? t('auth.signup.contactTitle') : t('auth.signin.contactTitle'), requestCode)}
         </>
       ) : (
         <>
-          <Text style={styles.hint}>{t('auth.otp.subtitle')} {email}</Text>
+          <Text style={styles.copy}>{`${t('auth.otp.subtitle')} ${email}`}</Text>
           <TextInput
-            style={styles.codeInput}
-            value={code}
-            onChangeText={(v) => setCode(v.replace(/\D/g, '').slice(0, 6))}
+            accessibilityLabel={t('auth.otp.title')}
+            autoComplete="one-time-code"
             keyboardType="number-pad"
             maxLength={6}
-            autoComplete="one-time-code"
-            textContentType="oneTimeCode"
-            placeholder="••••••"
-            accessibilityLabel={t('auth.otp.title')}
-            autoFocus
+            onChangeText={setCode}
             onSubmitEditing={confirmCode}
+            placeholder="000000"
+            placeholderTextColor={colors.muted}
+            style={[styles.input, styles.codeInput, code.length > 0 && styles.codeInputFilled]}
+            textContentType="oneTimeCode"
+            value={code}
           />
-          <Button size="md" loading={busy} onPress={confirmCode} style={styles.fullWidth}>{t('auth.otp.verifyButton')}</Button>
-          <View style={styles.row}>
-            <Button variant="outline" size="sm" onPress={() => { setStep('contact'); setCode(''); setError(''); setInfo(''); }}>{t('auth.otp.backButton')}</Button>
-            <Button variant="secondary" size="sm" disabled={busy} onPress={requestCode}>{t('auth.otp.resendButton')}</Button>
-          </View>
+          {primary(t('auth.otp.verifyButton'), confirmCode)}
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => {
+              setStep('contact');
+              setCode('');
+              setError('');
+              setInfo('');
+            }}
+            style={styles.secondaryButton}
+          >
+            <Text style={styles.secondaryLabel}>{t('profile.useDifferentEmail')}</Text>
+          </Pressable>
+          <Pressable accessibilityRole="button" disabled={busy} onPress={requestCode} style={styles.secondaryButton}>
+            <Text style={styles.secondaryLabel}>{t('auth.otp.resendButton')}</Text>
+          </Pressable>
         </>
       )}
-
       {info ? <Text style={styles.info}>{info}</Text> : null}
-      {error ? <Text style={styles.error} accessibilityLiveRegion="polite">{error}</Text> : null}
-
-      {reviewLoginEnabled && mode !== 'review' && (
-        <Pressable onPress={() => switchMode('review')} style={styles.reviewLink} accessibilityRole="button">
-          <Ionicons name="shield-checkmark-outline" size={18} color="#1075B9" />
-          <View style={styles.flex}>
-            <Text style={styles.reviewTitle}>{t('profile.reviewAccess')}</Text>
-            <Text style={styles.reviewHint}>{t('profile.reviewHint')}</Text>
-          </View>
-        </Pressable>
-      )}
-      {mode === 'review' && (
-        <Pressable onPress={() => switchMode('signin')} style={styles.reviewLink} accessibilityRole="button">
-          <Ionicons name="arrow-back" size={18} color="#1075B9" />
-          <Text style={styles.reviewTitle}>{t('auth.otp.backButton')}</Text>
-        </Pressable>
-      )}
+      {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  root: { flex: 1, flexDirection: 'row', justifyContent: 'flex-end' },
-  backdrop: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(0,0,0,0.45)' },
-  drawer: { backgroundColor: '#FFFFFF', height: '100%', paddingHorizontal: 20, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 12, elevation: 12 },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: '#E6EEF8' },
-  title: { fontSize: 20, fontFamily: 'Inter_700Bold', color: '#111827' },
-  body: { paddingVertical: 20 },
-  userBlock: { alignItems: 'center', gap: 4, marginBottom: 24 },
-  signedInAs: { fontSize: 12, color: '#6B7280', marginTop: 8 },
-  userName: { fontSize: 18, fontFamily: 'Inter_700Bold', color: '#111827' },
-  userEmail: { fontSize: 14, color: '#6B7280', marginBottom: 12 },
-  fullWidth: { alignSelf: 'stretch' },
-  tabs: { flexDirection: 'row', backgroundColor: '#F3F4F6', borderRadius: 10, padding: 4, marginBottom: 16 },
-  tab: { flex: 1, paddingVertical: 8, borderRadius: 8, alignItems: 'center' },
-  tabActive: { backgroundColor: '#FFFFFF' },
-  tabText: { fontSize: 14, color: '#6B7280', fontFamily: 'Inter_600SemiBold' },
-  tabTextActive: { color: '#FF6200' },
-  hint: { fontSize: 14, color: '#4B5563', marginBottom: 12 },
-  codeInput: { borderWidth: 1, borderColor: '#D1D5DB', borderRadius: 10, paddingVertical: 12, fontSize: 24, letterSpacing: 8, textAlign: 'center', marginBottom: 16, color: '#111827' },
-  row: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 },
-  info: { marginTop: 12, fontSize: 13, color: '#10B981' },
-  error: { marginTop: 12, fontSize: 13, color: '#EF4444' },
-  reviewLink: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 20, padding: 12, borderRadius: 10, backgroundColor: '#F0F6FF' },
-  reviewTitle: { fontSize: 14, color: '#1075B9', fontFamily: 'Inter_600SemiBold' },
-  reviewHint: { fontSize: 12, color: '#6B7280' },
-  sectionLabel: { marginTop: 28, marginBottom: 10, fontSize: 13, color: '#6B7280', fontFamily: 'Inter_600SemiBold', textTransform: 'uppercase' },
+  modalRoot: { flex: 1, flexDirection: 'row', justifyContent: 'flex-end', backgroundColor: 'rgba(16, 29, 23, 0.42)' },
+  drawer: {
+    height: '100%',
+    maxWidth: 420,
+    backgroundColor: colors.paper,
+    shadowColor: '#000000',
+    shadowOffset: { width: -6, height: 0 },
+    shadowOpacity: 0.18,
+    shadowRadius: 20,
+    elevation: 14,
+  },
+  drawerHeader: {
+    minHeight: 48,
+    paddingHorizontal: 18,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderBottomWidth: 1,
+    borderBottomColor: colors.line,
+  },
+  drawerTitle: { color: colors.ink, fontFamily: 'Georgia', fontSize: 22 },
+  closeButton: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.forestSoft },
+  content: { paddingHorizontal: 20, paddingTop: 18, paddingBottom: 28 },
+  identityCard: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.line, borderRadius: 8, alignItems: 'center', padding: 20 },
+  avatar: { width: 54, height: 54, borderRadius: 27, backgroundColor: colors.sage, alignItems: 'center', justifyContent: 'center', marginBottom: 11 },
+  avatarText: { color: colors.forest, fontFamily: 'Georgia', fontSize: 25 },
+  userName: { color: colors.ink, fontSize: 16, fontWeight: '700', textAlign: 'center' },
+  userEmail: { color: colors.muted, fontSize: 12, textAlign: 'center', marginTop: 4 },
+  statusBadge: { minHeight: 28, flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: colors.sage, borderRadius: 14, paddingHorizontal: 11, marginTop: 12 },
+  statusText: { color: colors.forest, fontSize: 11, fontWeight: '600' },
+  signedOutIcon: { width: 46, height: 46, borderRadius: 23, backgroundColor: colors.sage, alignItems: 'center', justifyContent: 'center', marginBottom: 10 },
+  signedOutTitle: { color: colors.ink, fontFamily: 'Georgia', fontSize: 19 },
+  signedOutBody: { color: colors.muted, fontSize: 13, lineHeight: 20, textAlign: 'center', marginTop: 8 },
+  signOutButton: {
+    minHeight: 48,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 9,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.errorLine,
+    borderRadius: 8,
+    marginTop: 16,
+  },
+  signOutLabel: { color: colors.error, fontSize: 13, fontWeight: '600' },
+  optionButton: {
+    minHeight: 62,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingHorizontal: 14,
+    marginTop: 14,
+    borderWidth: 1,
+    borderColor: colors.line,
+    borderRadius: 8,
+    backgroundColor: colors.surface,
+  },
+  optionCopy: { flex: 1 },
+  optionLabel: { color: colors.ink, fontSize: 13, fontWeight: '700' },
+  optionHint: { color: colors.muted, fontSize: 11, marginTop: 4 },
+  formCard: { backgroundColor: colors.surface, borderColor: colors.line, borderWidth: 1, borderRadius: 8, padding: 14, marginTop: 14 },
+  formHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 },
+  formTitle: { color: colors.ink, fontSize: 14, fontWeight: '700' },
+  copy: { color: colors.muted, fontSize: 13, lineHeight: 20, marginBottom: 14 },
+  input: {
+    minHeight: 50,
+    backgroundColor: colors.surface,
+    borderColor: colors.line,
+    borderWidth: 1,
+    borderRadius: 8,
+    color: colors.ink,
+    fontSize: 15,
+    paddingHorizontal: 14,
+    marginBottom: 12,
+  },
+  codeInput: { fontSize: 22, textAlign: 'center' },
+  codeInputFilled: { letterSpacing: 8 },
+  primaryButton: { minHeight: 48, backgroundColor: colors.forest, borderRadius: 8, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 18 },
+  primaryLabel: { color: colors.white, fontSize: 14, fontWeight: '600' },
+  disabled: { opacity: 0.7 },
+  secondaryButton: { minHeight: 44, alignItems: 'center', justifyContent: 'center' },
+  secondaryLabel: { color: colors.forest, fontSize: 13, fontWeight: '600' },
+  info: { color: colors.forest, fontSize: 12, textAlign: 'center', marginTop: 10 },
+  error: { color: colors.error, fontSize: 12, lineHeight: 18, textAlign: 'center', marginTop: 12 },
+  section: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.line, borderRadius: 8, padding: 15, marginTop: 14 },
+  sectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 },
+  sectionTitle: { color: colors.ink, fontSize: 13, fontWeight: '700' },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chip: { paddingVertical: 8, paddingHorizontal: 14, borderRadius: 999, borderWidth: 1, borderColor: '#D1D5DB' },
-  chipActive: { backgroundColor: '#FF6200', borderColor: '#FF6200' },
-  chipText: { fontSize: 14, color: '#374151' },
-  chipTextActive: { color: '#FFFFFF' },
+  chip: { minHeight: 34, paddingHorizontal: 14, borderRadius: 17, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.paper, alignItems: 'center', justifyContent: 'center' },
+  chipActive: { backgroundColor: colors.forest, borderColor: colors.forest },
+  chipText: { color: colors.ink, fontSize: 12, fontWeight: '600' },
+  chipTextActive: { color: colors.white },
 });

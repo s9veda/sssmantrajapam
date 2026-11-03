@@ -1,12 +1,21 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, RefreshControl, Platform } from 'react-native';
+import { Redirect, useLocalSearchParams } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MapComponent } from '@/components/MapComponent';
 import { Card } from '@/components/Card';
 import { useApp } from '@/context/AppContext';
 import { useTranslation } from '@/i18n';
+import { colors } from '@/lib/theme';
 
+// The map is hidden from navigation; it opens only on web with ?map=1.
 export default function MapScreen() {
+  const { map } = useLocalSearchParams<{ map?: string }>();
+  if (Platform.OS !== 'web' || map !== '1') return <Redirect href="/" />;
+  return <MapContent />;
+}
+
+function MapContent() {
   const { t } = useTranslation();
   const { aggregateData, loading, error, refreshData } = useApp();
   const locations = aggregateData?.locations ?? [];
@@ -16,11 +25,11 @@ export default function MapScreen() {
       <ScrollView
         style={styles.scrollView}
         refreshControl={
-          <RefreshControl refreshing={loading} onRefresh={refreshData} colors={['#FF6200']} />
+          <RefreshControl refreshing={loading} onRefresh={refreshData} colors={[colors.saffron]} />
         }
         contentContainerStyle={styles.content}
       >
-        <LinearGradient colors={['#F6F8FB', '#F0F6FF']} style={styles.gradientBg}>
+        <LinearGradient colors={[colors.paper, colors.sage]} style={styles.gradientBg}>
           <View style={styles.header}>
             <Text style={styles.title}>{t('map.title')}</Text>
           </View>
@@ -64,7 +73,7 @@ export default function MapScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F6F8FB',
+    backgroundColor: colors.paper,
   },
   gradientBg: {
     flex: 1,
@@ -83,7 +92,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 26,
     fontWeight: '700',
-    color: '#073763',
+    color: colors.forest,
     textAlign: 'center',
     fontFamily: 'Inter_700Bold',
   },
@@ -98,7 +107,7 @@ const styles = StyleSheet.create({
   summaryTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#073763',
+    color: colors.forest,
     marginBottom: 12,
     fontFamily: 'Inter_700Bold',
   },
@@ -110,10 +119,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 12,
-    backgroundColor: '#FBFEFF',
+    backgroundColor: colors.surface,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#E6EEF8',
+    borderColor: colors.line,
   },
   summaryInfo: {
     flex: 1,
@@ -121,31 +130,31 @@ const styles = StyleSheet.create({
   summaryLocation: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#0B1220',
+    color: colors.ink,
     fontFamily: 'Inter_600SemiBold',
   },
   summaryCoords: {
     fontSize: 12,
-    color: '#6B7280',
+    color: colors.muted,
     marginTop: 2,
     fontFamily: 'Inter_400Regular',
   },
   summaryCount: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#FF6200',
+    color: colors.saffron,
     fontFamily: 'Inter_700Bold',
   },
   errorBanner: {
     padding: 16,
-    backgroundColor: '#FEF2F2',
+    backgroundColor: colors.errorBg,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#FECACA',
+    borderColor: colors.errorLine,
     margin: 20,
   },
   errorText: {
-    color: '#EF4444',
+    color: colors.error,
     fontSize: 13,
     textAlign: 'center',
     fontFamily: 'Inter_400Regular',

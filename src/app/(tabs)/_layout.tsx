@@ -3,6 +3,7 @@ import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from '@/i18n';
 import { AppHeader } from '@/components/AppHeader';
+import { colors } from '@/lib/theme';
 
 export default function TabLayout() {
   const { t } = useTranslation();
@@ -11,12 +12,13 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         header: () => <AppHeader />,
-        tabBarActiveTintColor: '#FF6200',
-        tabBarInactiveTintColor: '#6B7280',
+        sceneStyle: { backgroundColor: colors.paper },
+        tabBarActiveTintColor: colors.forest,
+        tabBarInactiveTintColor: colors.muted,
         tabBarStyle: {
-          backgroundColor: '#FFFFFF',
+          backgroundColor: colors.surface,
           borderTopWidth: 1,
-          borderTopColor: '#E6EEF8',
+          borderTopColor: colors.line,
           paddingBottom: 8,
           height: 60,
         },
@@ -45,15 +47,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="map"
-        options={{
-          title: t('tabs.map'),
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="map-outline" size={size} color={color as string} />
-          ),
-        }}
-      />
+      <Tabs.Screen name="map" options={{ href: null }} />
     </Tabs>
   );
 }

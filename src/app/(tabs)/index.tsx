@@ -10,6 +10,7 @@ import { Modal } from '@/components/Modal';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
 import { useTranslation } from '@/i18n';
+import { colors } from '@/lib/theme';
 
 const todayString = () => new Date().toISOString().split('T')[0];
 
@@ -54,10 +55,10 @@ export default function DashboardScreen() {
   return (
     <View style={styles.container}>
       <ScrollView
-        refreshControl={<RefreshControl refreshing={loading} onRefresh={refreshData} colors={['#FF6200']} />}
+        refreshControl={<RefreshControl refreshing={loading} onRefresh={refreshData} colors={[colors.saffron]} />}
         contentContainerStyle={styles.content}
       >
-        <LinearGradient colors={['#F6F8FB', '#F0F6FF']} style={styles.gradient}>
+        <LinearGradient colors={[colors.paper, colors.sage]} style={styles.gradient}>
           <Card style={styles.photoCard} padding={0}>
             <Image source={require('../../../assets/bg.jpg')} style={styles.photo} resizeMode="cover" />
           </Card>
@@ -69,7 +70,7 @@ export default function DashboardScreen() {
 
           {user ? (
             <View style={styles.userRow}>
-              <Ionicons name="person-circle-outline" size={22} color="#FF6200" />
+              <Ionicons name="person-circle-outline" size={22} color={colors.saffron} />
               <Text style={styles.userText}>{t('submit.submittingAs')} {user.name}</Text>
             </View>
           ) : (
@@ -77,7 +78,7 @@ export default function DashboardScreen() {
           )}
 
           <Button variant="primary" size="lg" onPress={openSubmit} style={styles.submitButton}>
-            <Ionicons name="add-circle-outline" size={20} color="#FFFFFF" />
+            <Ionicons name="add-circle-outline" size={20} color={colors.white} />
             {t('dashboard.submitJapam')}
           </Button>
 
@@ -113,18 +114,18 @@ export default function DashboardScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F6F8FB' },
+  container: { flex: 1, backgroundColor: colors.paper },
   content: { flexGrow: 1 },
   gradient: { flex: 1, padding: 16, gap: 16, width: '100%', maxWidth: 720, alignSelf: 'center' },
   photoCard: { overflow: 'hidden' },
   photo: { width: '100%', height: 200 },
   totalCard: { alignItems: 'center' },
-  totalLabel: { fontSize: 14, color: '#6B7280', fontFamily: 'Inter_600SemiBold' },
-  totalValue: { fontSize: 44, color: '#FF6200', fontFamily: 'Inter_800ExtraBold' },
+  totalLabel: { fontSize: 14, color: colors.muted, fontFamily: 'Inter_600SemiBold' },
+  totalValue: { fontSize: 44, color: colors.saffron, fontFamily: 'Inter_800ExtraBold' },
   userRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
-  userText: { fontSize: 14, color: '#374151' },
-  hint: { textAlign: 'center', fontSize: 13, color: '#6B7280' },
+  userText: { fontSize: 14, color: colors.ink },
+  hint: { textAlign: 'center', fontSize: 13, color: colors.muted },
   submitButton: { alignSelf: 'stretch' },
-  errorBanner: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: 12, borderRadius: 10, backgroundColor: '#FEF2F2' },
-  errorText: { color: '#EF4444', fontSize: 14, flexShrink: 1 },
+  errorBanner: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: 12, borderRadius: 10, backgroundColor: colors.errorBg },
+  errorText: { color: colors.error, fontSize: 14, flexShrink: 1 },
 });

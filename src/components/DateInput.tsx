@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ViewStyle, TouchableOpacity } from 'react-native';
 import { Modal } from './Modal';
 import { Ionicons } from '@expo/vector-icons';
+import { colors } from '@/lib/theme';
 
 interface DateInputProps {
   label: string;
@@ -94,7 +95,7 @@ export function DateInput({
         ]}>
           {displayValue}
         </Text>
-        <Ionicons name="calendar" size={20} color="#6B7280" />
+        <Ionicons name="calendar" size={20} color={colors.muted} />
       </TouchableOpacity>
       {error && <Text style={styles.errorText}>{error}</Text>}
 
@@ -114,7 +115,7 @@ export function DateInput({
                   onPress={() => { setYear(y => Math.max(y - 1, minDateObj.getFullYear())); updatePickerDate(); }}
                   disabled={year <= minDateObj.getFullYear()}
                 >
-                  <Ionicons name="chevron-up" size={24} color="#FF6200" />
+                  <Ionicons name="chevron-up" size={24} color={colors.saffron} />
                 </TouchableOpacity>
                 <Text style={styles.pickerValue}>{year}</Text>
                 <TouchableOpacity
@@ -122,7 +123,7 @@ export function DateInput({
                   onPress={() => { setYear(y => y + 1); updatePickerDate(); }}
                   disabled={year >= maxDateObj.getFullYear()}
                 >
-                  <Ionicons name="chevron-down" size={24} color="#FF6200" />
+                  <Ionicons name="chevron-down" size={24} color={colors.saffron} />
                 </TouchableOpacity>
               </View>
             </View>
@@ -133,14 +134,14 @@ export function DateInput({
                   style={styles.pickerButton}
                   onPress={() => { setMonth(m => (m - 1 + 12) % 12); updatePickerDate(); }}
                 >
-                  <Ionicons name="chevron-up" size={24} color="#FF6200" />
+                  <Ionicons name="chevron-up" size={24} color={colors.saffron} />
                 </TouchableOpacity>
                 <Text style={styles.pickerValue}>{monthNames[month]}</Text>
                 <TouchableOpacity
                   style={styles.pickerButton}
                   onPress={() => { setMonth(m => (m + 1) % 12); updatePickerDate(); }}
                 >
-                  <Ionicons name="chevron-down" size={24} color="#FF6200" />
+                  <Ionicons name="chevron-down" size={24} color={colors.saffron} />
                 </TouchableOpacity>
               </View>
             </View>
@@ -152,7 +153,7 @@ export function DateInput({
                   onPress={() => { setDay(d => Math.max(d - 1, 1)); updatePickerDate(); }}
                   disabled={day <= 1}
                 >
-                  <Ionicons name="chevron-up" size={24} color="#FF6200" />
+                  <Ionicons name="chevron-up" size={24} color={colors.saffron} />
                 </TouchableOpacity>
                 <Text style={styles.pickerValue}>{String(day).padStart(2, '0')}</Text>
                 <TouchableOpacity
@@ -160,7 +161,7 @@ export function DateInput({
                   onPress={() => { setDay(d => Math.min(d + 1, maxDay)); updatePickerDate(); }}
                   disabled={day >= maxDay}
                 >
-                  <Ionicons name="chevron-down" size={24} color="#FF6200" />
+                  <Ionicons name="chevron-down" size={24} color={colors.saffron} />
                 </TouchableOpacity>
               </View>
             </View>
@@ -188,14 +189,14 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     marginBottom: 8,
-    color: '#0B1220',
+    color: colors.ink,
     fontFamily: 'Inter_400Regular',
   },
   labelError: {
-    color: '#EF4444',
+    color: colors.error,
   },
   required: {
-    color: '#EF4444',
+    color: colors.error,
   },
   selectButton: {
     flexDirection: 'row',
@@ -204,16 +205,16 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#E6EEF8',
-    backgroundColor: '#FBFEFF',
-    shadowColor: '#0B1220',
+    borderColor: colors.line,
+    backgroundColor: colors.surface,
+    shadowColor: colors.ink,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.02,
     shadowRadius: 0,
     elevation: 0,
   },
   selectError: {
-    borderColor: '#EF4444',
+    borderColor: colors.error,
   },
   selectText: {
     fontSize: 14,
@@ -221,13 +222,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   selectTextSelected: {
-    color: '#0B1220',
+    color: colors.ink,
   },
   selectTextPlaceholder: {
-    color: '#6B7280',
+    color: colors.muted,
   },
   errorText: {
-    color: '#EF4444',
+    color: colors.error,
     fontSize: 12,
     marginTop: 4,
     fontFamily: 'Inter_400Regular',
@@ -246,7 +247,7 @@ const styles = StyleSheet.create({
   },
   pickerLabel: {
     fontSize: 12,
-    color: '#6B7280',
+    color: colors.muted,
     marginBottom: 8,
     fontFamily: 'Inter_400Regular',
   },
@@ -263,7 +264,7 @@ const styles = StyleSheet.create({
   pickerValue: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#0B1220',
+    color: colors.ink,
     fontFamily: 'Inter_700Bold',
     minWidth: 60,
     textAlign: 'center',

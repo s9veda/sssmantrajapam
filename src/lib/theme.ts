@@ -1,0 +1,21 @@
+// Same palette as sssbhajanstudio.
+export const colors = {
+  paper: '#F7F4EC',
+  surface: '#FFFEFA',
+  ink: '#18251F',
+  muted: '#738078',
+  line: '#E6E1D7',
+  forest: '#21483B',
+  forestDeep: '#18372D',
+  forestSoft: '#426756',
+  online: '#78B68E',
+  saffron: '#C17A38',
+  saffronLight: '#F1E3D1',
+  saffronSoft: '#D99B5E',
+  rose: '#A64D43',
+  sage: '#DCE7DB',
+  white: '#FFFFFF',
+  error: '#A64237',
+  errorBg: '#F7E7E4',
+  errorLine: '#E8C4BF',
+};

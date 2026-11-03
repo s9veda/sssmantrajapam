@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import { DailyCount } from '@/types';
+import { colors } from '@/lib/theme';
 
 interface HistogramProps {
   data: DailyCount[];
@@ -54,27 +55,27 @@ const styles = StyleSheet.create({
   label: {
     width: 100,
     flexShrink: 0,
-    color: '#6B7280',
+    color: colors.muted,
     fontSize: 13,
     fontFamily: 'Inter_400Regular',
   },
   barWrapper: {
     flex: 1,
     height: 34,
-    backgroundColor: '#EAF3FF',
+    backgroundColor: colors.sage,
     borderRadius: 10,
     overflow: 'hidden',
   },
   bar: {
     height: '100%',
-    backgroundColor: '#FF6200',
+    backgroundColor: colors.saffron,
     borderRadius: 10,
   },
   count: {
     width: 60,
     textAlign: 'right',
     fontWeight: '700',
-    color: '#0B1220',
+    color: colors.ink,
     fontSize: 14,
     fontFamily: 'Inter_700Bold',
   },
@@ -83,7 +84,7 @@ const styles = StyleSheet.create({
     paddingVertical: 24,
   },
   emptyText: {
-    color: '#6B7280',
+    color: colors.muted,
     fontSize: 13,
     fontFamily: 'Inter_400Regular',
   },

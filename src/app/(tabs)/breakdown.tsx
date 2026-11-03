@@ -6,6 +6,7 @@ import { Histogram } from '@/components/Histogram';
 import { useApp } from '@/context/AppContext';
 import { DailyCount } from '@/types';
 import { useTranslation } from '@/i18n';
+import { colors } from '@/lib/theme';
 
 export default function BreakdownScreen() {
   const { t } = useTranslation();
@@ -17,11 +18,11 @@ export default function BreakdownScreen() {
       <ScrollView
         style={styles.scrollView}
         refreshControl={
-          <RefreshControl refreshing={loading} onRefresh={refreshData} colors={['#FF6200']} />
+          <RefreshControl refreshing={loading} onRefresh={refreshData} colors={[colors.saffron]} />
         }
         contentContainerStyle={styles.content}
       >
-        <LinearGradient colors={['#F6F8FB', '#F0F6FF']} style={styles.gradientBg}>
+        <LinearGradient colors={[colors.paper, colors.sage]} style={styles.gradientBg}>
           <View style={styles.header}>
             <Text style={styles.title}>{t('breakdown.title')}</Text>
           </View>
@@ -68,7 +69,7 @@ export default function BreakdownScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F6F8FB',
+    backgroundColor: colors.paper,
   },
   gradientBg: {
     flex: 1,
@@ -87,7 +88,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 26,
     fontWeight: '700',
-    color: '#073763',
+    color: colors.forest,
     textAlign: 'center',
     fontFamily: 'Inter_700Bold',
   },
@@ -100,7 +101,7 @@ const styles = StyleSheet.create({
   summaryTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#073763',
+    color: colors.forest,
     marginBottom: 16,
     fontFamily: 'Inter_700Bold',
   },
@@ -113,26 +114,26 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     fontSize: 12,
-    color: '#6B7280',
+    color: colors.muted,
     marginBottom: 4,
     fontFamily: 'Inter_400Regular',
   },
   summaryValue: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#0B1220',
+    color: colors.ink,
     fontFamily: 'Inter_700Bold',
   },
   errorBanner: {
     padding: 16,
-    backgroundColor: '#FEF2F2',
+    backgroundColor: colors.errorBg,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#FECACA',
+    borderColor: colors.errorLine,
     margin: 20,
   },
   errorText: {
-    color: '#EF4444',
+    color: colors.error,
     fontSize: 13,
     textAlign: 'center',
     fontFamily: 'Inter_400Regular',
